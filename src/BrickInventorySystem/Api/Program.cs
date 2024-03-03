@@ -1,3 +1,25 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using BrickManager.BrickInventorySystem.Api;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Starting Brick Inventory System");
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+
+var configurationBuilder = new ConfigurationBuilder()
+    .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+    .AddJsonFile($"appSettings.{builder.Environment.EnvironmentName}.json", false, true)
+    .Build();
+    
+var startup = new Startup(builder.Configuration);
+startup.ConfigureServices(builder.Services);
+builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
+
+var app = builder.Build();
+
+startup.Configure(app, app.Environment);
+app.Run();
