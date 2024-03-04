@@ -8,4 +8,9 @@
         <RootNamespace>BrickManager.BrickInventorySystem.Core</RootNamespace>
     </PropertyGroup>
 
+
+    <ItemGroup>
+      <PackageReference Include="MediatR" Version="12.2.0" />
+    </ItemGroup>
+
 </Project>
