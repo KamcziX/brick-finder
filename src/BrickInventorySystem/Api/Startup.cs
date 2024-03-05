@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BrickManager.BrickInventorySystem.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,11 @@ public class Startup
     {
         serviceCollection.AddHttpClient();
         serviceCollection.AddOptions();
+        
+        
+        serviceCollection.AddRepositories();
+        serviceCollection.AddUnitOfWork()
+            .AddDataComponents(_configuration, _configuration.BindFromSection);
         
         serviceCollection.AddHealthChecks();
         serviceCollection.AddControllers();
