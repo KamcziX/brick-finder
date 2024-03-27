@@ -1,4 +1,5 @@
 ﻿using BrickManager.BrickRecognitionSystem.Api;
+using BrickManager.BrickRecognitionSystem.Api.Endpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,8 @@ startup.ConfigureServices(builder.Services);
 builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
 
 var app = builder.Build();
+
+app.MapIdentificationEndpoints();
 
 startup.Configure(app, app.Environment);
 app.Run();
