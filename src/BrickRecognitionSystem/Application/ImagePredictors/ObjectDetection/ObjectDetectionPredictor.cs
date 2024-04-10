@@ -3,6 +3,8 @@ using System.Drawing.Imaging;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ImageManipulators;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection.BoundingBoxes;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection.DataModels;
+using BrickManager.BrickRecognitionSystem.Application.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.ML.Data;
 
 namespace BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection;
@@ -15,34 +17,28 @@ public interface IObjectDetectionPredictor
 public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectionModelScorer,
     IImageConverter imageConverter) : IObjectDetectionPredictor
 {
+    
     public ImageDataPrediction Predict(string fileName)
     {
         var imageAsBase64 = LoadImageAsBase64(fileName);
 
-        var nimage = imageConverter.ConvertToImageFromBase64(imageAsBase64);
-        // var image = imageConverter.ConvertToMlImageFromBase64(imageAsBase64);
+        var image = imageConverter.ConvertToImageFromBase64(imageAsBase64);
         
-        var annotatedImage = (Bitmap)nimage;
-        
+        var annotatedImage = (Bitmap)image;
 
-        // Current trained model expects images of 512x512 resolution.
+        // Current trained model expects images of 512x512 resolution. 
         // Model scorer is capable of resizing the model by itself but currently has troubles with keeping correct aspect ratio.
         // We use this method to resize the image to a slightly bigger version with correct aspect ratio
         // and later we allow the model to correct the size to a slightly smaller one.
         // At the moment is it impossible to skip that part in the model itself as it will throw an error hence we do it twice.
-        // var resizedImage = ImageEditor.ResizeImageWithAspectRatio(nimage, 513, 513);
-        // var onnxRepositionedImage = ImageEditor.RepositionImageOnExactSizeCanvas(resizedImage);
-        
+        // TODO: To remove resizing from here completely and expect the image to already arrive resized by now 
         int imageInputHeight = 513;
         int imageInputWidth = 513;
-        Bitmap resizedImage = ImageEditor.ResizeImageWithAspectRatio(nimage, imageInputWidth, imageInputHeight);
-        int inputImageResizedWidth = resizedImage.Width;
-        int inputImageResizedHeight = resizedImage.Height;
+        Bitmap resizedImage = ImageEditor.ResizeImageWithAspectRatio(image, imageInputWidth, imageInputHeight);
 
         // Now place the resized picture (with aspect ratio) in top left of black canvas 321x321
         // The output we will get will be a 1:1 ratio image, with any "empty" pixels black.
-        Bitmap bitmapOnnx = ImageEditor.RepositionImageOnExactSizeCanvas2(resizedImage, imageInputWidth, imageInputHeight);
-        
+        Bitmap bitmapOnnx = ImageEditor.RepositionImageOnExactSizeCanvas(resizedImage, imageInputWidth, imageInputHeight);
         
         Dictionary<string, IEnumerable<float[]>> probabilities = objectDetectionModelScorer.Score(bitmapOnnx);
         
@@ -53,7 +49,7 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
 
         var formattedDetectionBoxes = FormatDetectionBoxes(detectionBoxes);
 
-        var boundingBoxes = GetBoundingBoxes(detectionBoxes, detectionScores.ToList(), formattedDetectionBoxes, detectionClasses.ToList(), annotatedImage, nimage);
+        var boundingBoxes = GetBoundingBoxes(detectionBoxes, detectionScores.ToList(), formattedDetectionBoxes, detectionClasses.ToList(), annotatedImage, image);
 
         foreach (var boundingBox in boundingBoxes)
         {
@@ -61,7 +57,8 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
         }
         
         SavePredictedImage(bitmapOnnx);
-        // Return bounding box list and annotated image to caller.
+        
+        // TODO: This will return a dictionary of cropped images with singular lego object to pass onto further analysis 
         return new ImageDataPrediction(boundingBoxes, annotatedImage);
     }
 
@@ -146,15 +143,15 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
         return boundingBoxesList;
     }
     
+    [Obsolete("To be removed. Used only for testing purposes.")]
     private static void SavePredictedImage(Image annotatedImage)
     {
         var myImageCodecInfo = GetEncoderInfo("image/jpeg");
         var myEncoderParameters = new EncoderParameters(1);
         var myEncoderParameter = new EncoderParameter(Encoder.Quality, 75L);
         myEncoderParameters.Param[0] = myEncoderParameter;
-
-        // annotatedImage.Save("D:\\Users\\krzys\\RiderProjects\\brick-finder\\src\\BrickRecognitionSystem\\Application\\ImagePredictors\\ObjectDetection\\Data\\prediction.jpg",myImageCodecInfo, myEncoderParameters);
-        annotatedImage.Save("D:\\Users\\krzys\\RiderProjects\\brick-finder\\src\\BrickRecognitionSystem\\Application\\ImagePredictors\\ObjectDetection\\Data\\prediction.jpg");
+        
+        annotatedImage.Save("src/BrickRecognitionSystem/Application/ImagePredictors/ObjectDetection/Data/prediction.jpg");
     }
     
     private static ImageCodecInfo GetEncoderInfo(String mimeType)

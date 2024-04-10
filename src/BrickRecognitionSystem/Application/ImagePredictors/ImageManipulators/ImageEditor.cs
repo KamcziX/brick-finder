@@ -18,35 +18,31 @@ public static class ImageEditor
     public static Bitmap ResizeImageWithAspectRatio(Image image, int width, int height)
     {
         // Figure out the ratio
-        double ratioX = (double)width / image.Width;
-        double ratioY = (double)height / image.Height;
+        var ratioX = (double)width / image.Width;
+        var ratioY = (double)height / image.Height;
         
         // Use whichever multiplier is smaller
-        double ratio = ratioX < ratioY ? ratioX : ratioY;
+        var ratio = ratioX < ratioY ? ratioX : ratioY;
 
         // Now calculate the new height and width
-        int newHeight = Convert.ToInt32(image.Height * ratio);
-        int newWidth = Convert.ToInt32(image.Width * ratio);
+        var newHeight = Convert.ToInt32(image.Height * ratio);
+        var newWidth = Convert.ToInt32(image.Width * ratio);
 
         var destRect = new Rectangle(0, 0, newWidth, newHeight);
         var destImage = new Bitmap(newWidth, newHeight);
 
         destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-        using (var graphics = Graphics.FromImage(destImage))
-        {
-            graphics.CompositingMode = CompositingMode.SourceCopy;
-            graphics.CompositingQuality = CompositingQuality.HighQuality;
-            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            graphics.SmoothingMode = SmoothingMode.HighQuality;
-            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        using var graphics = Graphics.FromImage(destImage);
+        graphics.CompositingMode = CompositingMode.SourceCopy;
+        graphics.CompositingQuality = CompositingQuality.HighQuality;
+        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        graphics.SmoothingMode = SmoothingMode.HighQuality;
+        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            using (var wrapMode = new ImageAttributes())
-            {
-                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-            }
-        }
+        using var wrapMode = new ImageAttributes();
+        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
 
         return destImage;
     }
@@ -57,49 +53,15 @@ public static class ImageEditor
     /// </summary>
     /// <param name="image">Image to reposition</param>
     /// <returns>Repositioned image</returns>
-    public static Bitmap RepositionImageOnExactSizeCanvas(Bitmap image)
+    public static Bitmap RepositionImageOnExactSizeCanvas(Bitmap inputImageResized, int width, int height)
     {
-        var resizedImageWidth = image.Width;
-        var resizedImageHeight = image.Height;
-        
-        // MemoryStream ms = new();
-        // onnxRepositionedImage.Save(ms, ImageFormat.Jpeg);
-        // ms.Seek(0, SeekOrigin.Begin);
-        // var mlImage = MLImage.CreateFromStream(ms);
-        Bitmap bitmapOnnx = new Bitmap(resizedImageWidth, resizedImageHeight);
-        MemoryStream ms = new();
-        bitmapOnnx.Save(ms, ImageFormat.Jpeg);
-        ms.Seek(0, SeekOrigin.Begin);
-        
+        var bitmapOnnx = new Bitmap(width, height);
         bitmapOnnx.SetResolution(72, 72);
-        using (Graphics graph = Graphics.FromImage(image))
-        {
-            Rectangle ImageSize = new Rectangle(0, 0, resizedImageWidth, resizedImageHeight);
-            graph.FillRectangle(Brushes.Black, ImageSize);
-            graph.DrawImageUnscaled(image, 0, 0);
-        }
-
-
         
-        return bitmapOnnx;
-    }
-    
-    /// <summary>
-    /// Repositions and fills the image that has been resized to the exact specified size so the predicted bounding boxes do not seem offset.
-    /// The input image will be placed in the top left corner of the canvas, all of the "empty" pixels will be set to black.
-    /// </summary>
-    /// <param name="image">Image to reposition</param>
-    /// <returns>Repositioned image</returns>
-    public static Bitmap RepositionImageOnExactSizeCanvas2(Bitmap inputImageResized, int width, int height)
-    {
-        Bitmap bitmapOnnx = new Bitmap(width, height);
-        bitmapOnnx.SetResolution(72, 72);
-        using (Graphics graph = Graphics.FromImage(bitmapOnnx))
-        {
-            Rectangle ImageSize = new Rectangle(0, 0, width, height);
-            graph.FillRectangle(Brushes.Black, ImageSize);
-            graph.DrawImageUnscaled(inputImageResized, 0, 0);
-        }
+        using var graph = Graphics.FromImage(bitmapOnnx);
+        var ImageSize = new Rectangle(0, 0, width, height);
+        graph.FillRectangle(Brushes.Black, ImageSize);
+        graph.DrawImageUnscaled(inputImageResized, 0, 0);
 
         return bitmapOnnx;
     }
@@ -107,26 +69,25 @@ public static class ImageEditor
     /// <summary>
     /// Draw a bounding box on an image.
     /// </summary>
-    public static void DrawBoundingBox(BoundingBox bbox, ref Bitmap annotatedImage) 
+    public static void DrawBoundingBox(BoundingBox bbox, ref Bitmap annotatedImage)
     {
         // annotatedImage.
-        using (Graphics thumbnailGraphic = Graphics.FromImage(annotatedImage))
-        {
-            thumbnailGraphic.CompositingQuality = CompositingQuality.HighQuality;
-            thumbnailGraphic.SmoothingMode = SmoothingMode.HighQuality;
-            thumbnailGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        using var thumbnailGraphic = Graphics.FromImage(annotatedImage);
+        
+        thumbnailGraphic.CompositingQuality = CompositingQuality.HighQuality;
+        thumbnailGraphic.SmoothingMode = SmoothingMode.HighQuality;
+        thumbnailGraphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            // Draw label string on image
-            Font drawFont = new Font("Arial", 36, FontStyle.Bold);
-            SizeF size = thumbnailGraphic.MeasureString(bbox.Label ?? "unknown", drawFont);
-            SolidBrush fontBrush = new SolidBrush(Color.Red);
-            Point atPoint = new Point(bbox.XStart, bbox.YStart - (int)size.Height - 1);
-            thumbnailGraphic.DrawString(bbox.Label ?? "unknown", drawFont, fontBrush, atPoint);
+        // Draw label string on image
+        var drawFont = new Font("Arial", 36, FontStyle.Bold);
+        var size = thumbnailGraphic.MeasureString(bbox.Label ?? "unknown", drawFont);
+        var fontBrush = new SolidBrush(Color.Red);
+        var atPoint = new Point(bbox.XStart, bbox.YStart - (int)size.Height - 1);
+        thumbnailGraphic.DrawString(bbox.Label ?? "unknown", drawFont, fontBrush, atPoint);
 
-            // Draw bounding box on image
-            Pen pen = new Pen(Color.GreenYellow, 6f);
-            thumbnailGraphic.DrawRectangle(pen, bbox.XStart, bbox.YStart, bbox.XEnd - bbox.XStart, bbox.YEnd - bbox.YStart);
-        }
+        // Draw bounding box on image
+        var pen = new Pen(Color.GreenYellow, 6f);
+        thumbnailGraphic.DrawRectangle(pen, bbox.XStart, bbox.YStart, bbox.XEnd - bbox.XStart, bbox.YEnd - bbox.YStart);
     }
 
 }

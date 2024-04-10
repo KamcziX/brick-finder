@@ -1,6 +1,4 @@
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Numerics;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.Base;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection.DataModels;
 using Microsoft.ML;
@@ -19,19 +17,13 @@ public interface IObjectDetectionModelScorer
 /// </summary>
 public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
 {
-    // private const string ModelFilePath = @"src/BrickRecognitionSystem/Application/ImagePredictors/ObjectDetection/Data/lego-detection1.onnx";
-    private  static readonly string ModelFilePath = Path.Combine("D:\\Users\\krzys\\RiderProjects\\brick-finder\\src\\BrickRecognitionSystem\\Application\\ImagePredictors\\ObjectDetection\\Data", "lego-detection1.onnx");
+    private  static readonly string ModelFilePath = "src/BrickRecognitionSystem/Application/ImagePredictors/ObjectDetection/Data/lego-detection1.onnx";
     private static EstimatorChain<Microsoft.ML.Transforms.Onnx.OnnxTransformer>? _pipeline;
-
     private static TransformerChain<Microsoft.ML.Transforms.Onnx.OnnxTransformer>? _model = null;
-    // private static readonly string ML_NET_MODEL =
-    //     Path.Combine("D:\\Users\\krzys\\RiderProjects\\brick-finder\\src\\BrickRecognitionSystem\\Application\\ImagePredictors\\ObjectDetection\\Data", "lego-detection1.onnx");
-
 
     public Dictionary<string, IEnumerable<float[]>> Score(Bitmap bitmapOnnx)
     {
         var model = LoadModel();
-        
 
         List<ImageDataInput> mlImages =
         [
@@ -41,7 +33,7 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
             }
         ];
 
-        IDataView data = MlContext.Data.LoadFromEnumerable(mlImages);
+        var data = MlContext.Data.LoadFromEnumerable(mlImages);
         return PredictDataUsingModel(data, model);
     }
 
@@ -53,13 +45,10 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
     {
         if (_model != null)
             return _model;
-
-        // Create a MLContext object.
-        // var _mlContext = new MLContext();
         
         SetPipeline();
-        List<ImageDataInput> MLImages = new List<ImageDataInput>();
-        IDataView imageDataView = MlContext.Data.LoadFromEnumerable(MLImages);
+        var MLImages = new List<ImageDataInput>();
+        var imageDataView = MlContext.Data.LoadFromEnumerable(MLImages);
 
         return _model = _pipeline!.Fit(imageDataView);
     }
@@ -100,19 +89,14 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
                 modelFile: ModelFilePath,
                 outputColumnNames: new[]
                 {
-                    // ObjectDetectionConstants.OutputColumnDetectionAnchorIndices,
-                    // ObjectDetectionConstants.OutputColumnDetectionBoxes,
-                    // ObjectDetectionConstants.OutputColumnDetectionClasses,
-                    // ObjectDetectionConstants.OutputColumnDetectionScores
-                    "detection_anchor_indices",
-                    "detection_boxes",
-                    "detection_classes",
-                    "detection_scores",
+                    ObjectDetectionConstants.OutputColumnDetectionAnchorIndices,
+                    ObjectDetectionConstants.OutputColumnDetectionBoxes,
+                    ObjectDetectionConstants.OutputColumnDetectionClasses,
+                    ObjectDetectionConstants.OutputColumnDetectionScores
                 },
                 inputColumnNames: new[]
                 {
-                    // ObjectDetectionConstants.InputColumn
-                    "input_tensor" 
+                    ObjectDetectionConstants.InputColumn
                 },
                 gpuDeviceId: null,
                 fallbackToCpu: true));
@@ -127,13 +111,23 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
     /// <returns></returns>
     private Dictionary<string, IEnumerable<float[]>> PredictDataUsingModel(IDataView testData, ITransformer model)
     {
-        IDataView scoredData = model.Transform(testData);
+        var scoredData = model.Transform(testData);
         
-        var returns = new Dictionary<string, IEnumerable<float[]>>();
-        returns.Add("detection_boxes", scoredData.GetColumn<float[]>("detection_boxes"));
-        returns.Add("detection_classes", scoredData.GetColumn<float[]>("detection_classes"));
-        returns.Add("detection_scores", scoredData.GetColumn<float[]>("detection_scores"));
-
+        var returns = new Dictionary<string, IEnumerable<float[]>>
+        {
+            {
+                ObjectDetectionConstants.OutputColumnDetectionBoxes,
+                scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionBoxes)
+            },
+            {
+                ObjectDetectionConstants.OutputColumnDetectionClasses,
+                scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionClasses)
+            },
+            { 
+                ObjectDetectionConstants.OutputColumnDetectionScores, 
+                scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionScores) 
+            }
+        };
 
         return returns;
     }
