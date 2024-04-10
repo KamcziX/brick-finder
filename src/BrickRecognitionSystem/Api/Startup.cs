@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BrickManager.BrickRecognitionSystem.Application.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,7 +20,9 @@ public class Startup
     {
         serviceCollection.AddHttpClient();
         serviceCollection.AddOptions();
-        
+
+        serviceCollection.AddApplicationServices();
+            
         serviceCollection.AddHealthChecks();
         serviceCollection.AddControllers();
     }

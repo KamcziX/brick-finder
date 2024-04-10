@@ -12,7 +12,23 @@
       <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
       <PackageReference Include="MediatR" Version="12.2.0" />
       <PackageReference Include="MediatR.Extensions.FluentValidation.AspNetCore" Version="5.1.0" />
-      <PackageReference Include="Microsoft.ML" Version="3.0.1" />
+      <PackageReference Include="Microsoft.ML" Version="1.7.1" />
+      <PackageReference Include="Microsoft.ML.CpuMath" Version="1.7.1" />
+      <PackageReference Include="Microsoft.ML.DataView" Version="1.7.1" />
+      <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.7.1" />
+      <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.11.0" />
+      <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.7.1" />
+      <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="ImagePredictors\ObjectDetection\Data\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="ImagePredictors\ObjectDetection\Data\lego-detection1.onnx">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

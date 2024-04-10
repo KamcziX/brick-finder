@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using BrickManager.BrickRecognitionSystem.Application.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -9,8 +10,9 @@ public static class IdentificationEndpoints
 {
     public static void MapIdentificationEndpoints(this IEndpointRouteBuilder routeBuilder)
     {
-        routeBuilder.MapPost("/api/identification/identify-picture", async (ISender sender) =>
-        {
+        routeBuilder.MapPost("/api/identification/identify-picture", async (ISender sender, IdentifyPictureCommand command) =>
+            {
+                sender.Send(command);
             return Results.Ok(42);
             
         }).WithOpenApi()
