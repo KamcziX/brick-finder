@@ -89,5 +89,31 @@ public static class ImageEditor
         var pen = new Pen(Color.GreenYellow, 6f);
         thumbnailGraphic.DrawRectangle(pen, bbox.XStart, bbox.YStart, bbox.XEnd - bbox.XStart, bbox.YEnd - bbox.YStart);
     }
+    
+    /// <summary>
+    /// Draw a bounding box on an image.
+    /// </summary>
+    public static Bitmap CutUsingBoundingBox(BoundingBox bbox, Bitmap annotatedImage)
+    {
+        const int imageWidth = 128;
+        const int imageHeight = 128;
+        
+        var centerPoint = new Point(bbox.XEnd/2 + bbox.XStart/2, bbox.YEnd/2 + bbox.YStart/2);
+
+        var startingX = centerPoint.X - imageHeight / 2;
+        var startingY = centerPoint.Y - imageWidth / 2;
+        
+        if (startingX < 0)
+            startingX = 0;
+        
+        if (startingY < 0)
+            startingY = 0;
+        
+        var startingPoint = new Point(startingX,  startingY);
+        var fixedIageSize = new Size(imageWidth, imageHeight);
+        
+        var croppedImage = annotatedImage.Clone(new Rectangle(startingPoint, fixedIageSize), annotatedImage.PixelFormat);
+        return croppedImage;
+    }
 
 }

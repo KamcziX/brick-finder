@@ -51,12 +51,16 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
 
         var boundingBoxes = GetBoundingBoxes(detectionBoxes, detectionScores.ToList(), formattedDetectionBoxes, detectionClasses.ToList(), annotatedImage, image);
 
+        var imagesToSave = new List<Bitmap>();
+        
         foreach (var boundingBox in boundingBoxes)
         {
-            ImageEditor.DrawBoundingBox(boundingBox, ref bitmapOnnx);
+            var croppedImage = ImageEditor.CutUsingBoundingBox(boundingBox, bitmapOnnx);
+            
+            imagesToSave.Add(croppedImage);
         }
         
-        SavePredictedImage(bitmapOnnx);
+        SavePredictedImages(imagesToSave);
         
         // TODO: This will return a dictionary of cropped images with singular lego object to pass onto further analysis 
         return new ImageDataPrediction(boundingBoxes, annotatedImage);
@@ -144,14 +148,19 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
     }
     
     [Obsolete("To be removed. Used only for testing purposes.")]
-    private static void SavePredictedImage(Image annotatedImage)
+    private static void SavePredictedImages(List<Bitmap> annotatedImages)
     {
-        var myImageCodecInfo = GetEncoderInfo("image/jpeg");
-        var myEncoderParameters = new EncoderParameters(1);
-        var myEncoderParameter = new EncoderParameter(Encoder.Quality, 75L);
-        myEncoderParameters.Param[0] = myEncoderParameter;
-        
-        annotatedImage.Save("src/BrickRecognitionSystem/Application/ImagePredictors/ObjectDetection/Data/prediction.jpg");
+        var imageCount = annotatedImages.Count;
+        foreach (var annotatedImage in annotatedImages)
+        {
+            var filePath = Path.Combine(
+                @"",
+                $"prediction{imageCount}.jpg");
+            
+            annotatedImage.Save(filePath);
+
+            imageCount = imageCount - 1;
+        }
     }
     
     private static ImageCodecInfo GetEncoderInfo(String mimeType)
