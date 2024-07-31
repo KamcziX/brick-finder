@@ -18,11 +18,15 @@
       <PackageReference Include="Microsoft.ML.ImageAnalytics" Version="1.7.1" />
       <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.11.0" />
       <PackageReference Include="Microsoft.ML.OnnxTransformer" Version="1.7.1" />
+      <PackageReference Include="Microsoft.ML.TensorFlow" Version="1.7.1" />
+      <PackageReference Include="SciSharp.TensorFlow.Redist" Version="1.14.0" />
+      <PackageReference Include="Serilog" Version="4.0.1" />
       <PackageReference Include="System.Drawing.Common" Version="8.0.3" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="ImagePredictors\ObjectDetection\Data\" />
+      <Folder Include="ImagePredictors\ObjectRecognition\InceptionModel\" />
     </ItemGroup>
 
     <ItemGroup>
