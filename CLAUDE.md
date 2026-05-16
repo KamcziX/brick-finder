@@ -49,6 +49,15 @@ Each bounded context has its own CLAUDE.md with layer-specific rules. This file 
 
 ---
 
+## DTO & Contract Rules
+
+- **Domain DTOs are internal to the Application layer.** They must never be returned from Api endpoints or exposed outside the Application layer directly.
+- **To expose data outside the Application layer**, use a Response DTO named `*ResponseDto` (e.g. `IdentificationResultResponseDto`). These live in `Application/Dto/`.
+- **To accept a request body in an Api endpoint** that will be mapped to a command, use a Request DTO named `*RequestDto` (e.g. `IdentifyPictureRequestDto`). These live in the `Api` layer alongside the endpoint that uses them.
+- Api endpoints receive a `*RequestDto`, map it to a command, dispatch via MediatR, and return a `*ResponseDto` — never pass domain types across this boundary.
+
+---
+
 ## What Claude Should Not Do
 
 - Do not add features, abstractions, or refactors beyond what the current task requires.

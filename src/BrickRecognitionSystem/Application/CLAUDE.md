@@ -33,10 +33,27 @@ This layer owns all business logic: MediatR commands, ML predictors, image proce
 
 ---
 
+## DTO Rules
+
+- Domain DTOs (from Core) may be used freely within the Application layer
+- Never return a domain DTO from a command/query handler — map to a `*ResponseDto` record before returning (e.g. `IdentificationResultResponseDto`)
+- Response DTOs live in `Application/Dto/` and are named `*ResponseDto`
+
+---
+
 ## Options Rules
 
 - Options classes live in `Application/Options/`
 - The class name must match the appSettings section name exactly (e.g. `ApiOptions` → `"ApiOptions"` section)
+
+---
+
+## ML Model Versioning
+
+- Model file names must include a version suffix: `lego-detection-v1.onnx`, `lego-detection-v2.onnx`, etc. — never overwrite an existing model file
+- Model file paths must be configurable via options (not hardcoded in code). Add an options class in `Application/Options/` and read the path from appSettings — do not use the static string in `ObjectDetectionModelScorer` for new models
+- Before replacing the active model, validate it manually against a fixed set of test images and confirm it meets or exceeds the previous model's detection accuracy
+- When a model is updated, add an entry to `ImagePredictors/ObjectDetection/Data/MODELS.md` with: model filename, date, and a short description of what changed (e.g. retrained on new dataset, architecture change)
 
 ---
 
@@ -45,3 +62,4 @@ This layer owns all business logic: MediatR commands, ML predictors, image proce
 - Do not reload the ONNX or TensorFlow model per request — use the static cached instances
 - Do not hardcode ONNX column names — use constants from `ObjectDetectionConstants.cs`
 - Do not add new ML or image-processing services without registering them in `AddApplicationServices()`
+- Do not overwrite an existing model file — always use a versioned filename and update appSettings to point to the new one

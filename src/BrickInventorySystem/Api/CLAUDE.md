@@ -6,6 +6,14 @@ This layer owns the ASP.NET Core entry point, endpoint registration, and configu
 
 ---
 
+## Request & Response DTO Rules
+
+- If an endpoint accepts a request body that maps to a command, define a `*RequestDto` record in the `Api` layer alongside the endpoint (e.g. `IdentifyPictureRequestDto`)
+- Map the `*RequestDto` to the command inside the endpoint handler — do not pass the RequestDto into the Application layer
+- Endpoints must return a `*ResponseDto` from the Application layer — never return a domain type or a command/query object directly
+
+---
+
 ## Configuration Rules
 
 - Bind config sections using `ConfigurationExtensions.BindFromSection<T>()` (`ConfigurationExtensions.cs`)
