@@ -20,9 +20,10 @@ public class Startup
     {
         serviceCollection.AddHttpClient();
         serviceCollection.AddOptions();
+        serviceCollection.AddProblemDetails();
 
         serviceCollection.AddApplicationServices();
-            
+
         serviceCollection.AddHealthChecks();
         serviceCollection.AddControllers();
     }
@@ -31,6 +32,8 @@ public class Startup
         IWebHostEnvironment webHostEnvironment)
     {
         applicationBuilder.UseHsts();
+        applicationBuilder.UseExceptionHandler();
+        applicationBuilder.UseStatusCodePages();
         applicationBuilder.UseRouting();
         
         applicationBuilder.UseEndpoints(
