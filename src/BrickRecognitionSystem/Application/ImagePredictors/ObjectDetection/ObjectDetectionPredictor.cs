@@ -9,12 +9,23 @@ using Microsoft.ML.Data;
 
 namespace BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection;
 
+/// <summary>
+/// Runs the full object detection pipeline on an image file and returns detected bounding boxes.
+/// </summary>
 public interface IObjectDetectionPredictor
 {
+    /// <summary>
+    /// Loads the image at the given path, runs it through the detection pipeline, and returns the prediction result.
+    /// </summary>
+    /// <param name="fileName">Path to the image file to process.</param>
+    /// <returns>An <see cref="ImageDataPrediction"/> containing detected bounding boxes and the annotated image.</returns>
     ImageDataPrediction Predict(string fileName);
 }
 
-public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectionModelScorer,
+/// <summary>
+/// Implements the full object detection pipeline: image loading, pre-processing, model scoring, and bounding box extraction.
+/// </summary>
+public sealed class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectionModelScorer,
     IImageConverter imageConverter) : IObjectDetectionPredictor
 {
     
@@ -85,7 +96,7 @@ public class ObjectDetectionPredictor(IObjectDetectionModelScorer objectDetectio
     /// <summary>
     /// Formats retrieved detection boxes coordinates from a single array of values into a easily readable collection of coordinates grouped by 4. 
     /// </summary>
-    /// <param name="detectionBoxes">Un</param>
+    /// <param name="detectionBoxes">Unformatted detection box arrays as returned directly by the model — a flat array of 400 float values representing 100 boxes with 4 coordinates each.</param>
     /// <returns></returns>
     private static IEnumerable<float[]> FormatDetectionBoxes(ICollection<float[]> detectionBoxes)
     {

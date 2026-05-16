@@ -1,23 +1,24 @@
-﻿using BrickManager.BrickRecognitionSystem.Application.Dto;
+﻿using BrickManager.BrickRecognitionSystem.Application.Dto.IdentifyPicture.Responses;
+
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection;
 using MediatR;
 
 namespace BrickManager.BrickRecognitionSystem.Application.Commands;
 
 /// <summary>
-/// Command used in picture identification process
+/// Command used in picture identification process.
 /// </summary>
-/// <param name="Picture"></param>
-public record IdentifyPictureCommand(string PictureName) : IRequest<IdentificationResultDto>;
+/// <param name="PictureName">Name of the picture file to identify.</param>
+public sealed record IdentifyPictureCommand(string PictureName) : IRequest<IdentificationResultResponseDto>;
 
 /// <inheritdoc cref="IdentifyPictureCommand"/>
-public class IdentifyPictureCommandHandler(IObjectDetectionPredictor objectDetectionPredictor) 
-    : IRequestHandler<IdentifyPictureCommand, IdentificationResultDto>
+internal sealed class IdentifyPictureCommandHandler(IObjectDetectionPredictor objectDetectionPredictor)
+    : IRequestHandler<IdentifyPictureCommand, IdentificationResultResponseDto>
 {
-    public async Task<IdentificationResultDto> Handle(IdentifyPictureCommand request, 
+    public async Task<IdentificationResultResponseDto> Handle(IdentifyPictureCommand request,
         CancellationToken cancellationToken)
     {
         var x = objectDetectionPredictor.Predict(request.PictureName);
-        return new IdentificationResultDto(new Dictionary<string, int>());
+        return new IdentificationResultResponseDto(new Dictionary<string, int>());
     }
 }
