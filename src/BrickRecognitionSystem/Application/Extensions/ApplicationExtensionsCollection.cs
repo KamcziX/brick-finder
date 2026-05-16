@@ -1,6 +1,7 @@
-using BrickManager.BrickRecognitionSystem.Application.Commands;
+﻿using BrickManager.BrickRecognitionSystem.Application.Commands;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ImageManipulators;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection;
+using MediatR.Extensions.FluentValidation.AspNetCore;
 using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection;
 
