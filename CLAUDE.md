@@ -37,6 +37,9 @@ Each bounded context has its own CLAUDE.md with layer-specific rules. This file 
 - **No raw SQL — EF Core only.** All database access goes through EF Core. No ADO.NET, no Dapper, no string-interpolated queries.
 - Use `CancellationToken` parameters on all async public methods that perform I/O.
 - Prefer records for immutable data transfer objects (DTOs, value objects).
+- DTOs (`*ResponseDto`, `*RequestDto`) must be `sealed` unless explicitly intended for inheritance.
+- Commands and Queries must be `sealed record`.
+- Command handlers and Query handlers must be `internal sealed class`.
 - Do not use `static` classes or the singleton pattern manually — use the DI container.
 
 ---
@@ -52,8 +55,8 @@ Each bounded context has its own CLAUDE.md with layer-specific rules. This file 
 ## DTO & Contract Rules
 
 - **Domain DTOs are internal to the Application layer.** They must never be returned from Api endpoints or exposed outside the Application layer directly.
-- **To expose data outside the Application layer**, use a Response DTO named `*ResponseDto` (e.g. `IdentificationResultResponseDto`). These live in `Application/Dto/`.
-- **To accept a request body in an Api endpoint** that will be mapped to a command, use a Request DTO named `*RequestDto` (e.g. `IdentifyPictureRequestDto`). These live in the `Api` layer alongside the endpoint that uses them.
+- **To expose data outside the Application layer**, use a Response DTO named `*ResponseDto`. These live in `Application/Dto/<TaskName>/Responses/` (e.g. `Dto/IdentifyPicture/Responses/IdentificationResultResponseDto.cs`).
+- **To accept a request body in an Api endpoint**, use a Request DTO named `*RequestDto`. These live in `Application/Dto/<TaskName>/Requests/` (e.g. `Dto/IdentifyPicture/Requests/IdentifyPictureRequestDto.cs`).
 - Api endpoints receive a `*RequestDto`, map it to a command, dispatch via MediatR, and return a `*ResponseDto` — never pass domain types across this boundary.
 
 ---

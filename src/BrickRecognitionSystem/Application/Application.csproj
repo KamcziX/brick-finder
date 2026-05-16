@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="ImagePredictors\ObjectDetection\Data\lego-detection1.onnx">
+      <None Update="ImagePredictors\ObjectDetection\Data\lego-detection-v1.onnx">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

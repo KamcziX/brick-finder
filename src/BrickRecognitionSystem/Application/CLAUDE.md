@@ -36,8 +36,13 @@ This layer owns all business logic: MediatR commands, ML predictors, image proce
 ## DTO Rules
 
 - Domain DTOs (from Core) may be used freely within the Application layer
-- Never return a domain DTO from a command/query handler — map to a `*ResponseDto` record before returning (e.g. `IdentificationResultResponseDto`)
-- Response DTOs live in `Application/Dto/` and are named `*ResponseDto`
+- Never return a domain DTO from a command/query handler — map to a `*ResponseDto` before returning
+- DTOs are organized under `Application/Dto/<TaskName>/` where `<TaskName>` matches the command or use case (e.g. `IdentifyPicture`):
+  - `Dto/<TaskName>/Requests/` — request DTOs named `*RequestDto` (e.g. `Dto/IdentifyPicture/Requests/IdentifyPictureRequestDto.cs`)
+  - `Dto/<TaskName>/Responses/` — response DTOs named `*ResponseDto` (e.g. `Dto/IdentifyPicture/Responses/IdentificationResultResponseDto.cs`)
+- All DTOs must be `sealed record` unless explicitly designed for inheritance
+- Commands and Queries must be `sealed record`
+- Command handlers and Query handlers must be `internal sealed class`
 
 ---
 

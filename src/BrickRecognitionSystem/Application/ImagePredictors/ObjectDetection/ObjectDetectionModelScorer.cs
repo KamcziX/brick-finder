@@ -1,6 +1,8 @@
 using System.Drawing;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.Base;
 using BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection.DataModels;
+using BrickManager.BrickRecognitionSystem.Application.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
@@ -17,9 +19,14 @@ public interface IObjectDetectionModelScorer
 /// </summary>
 public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
 {
-    private  static readonly string ModelFilePath = "src/BrickRecognitionSystem/Application/ImagePredictors/ObjectDetection/Data/lego-detection1.onnx";
+    private readonly string _modelFilePath;
     private static EstimatorChain<Microsoft.ML.Transforms.Onnx.OnnxTransformer>? _pipeline;
     private static TransformerChain<Microsoft.ML.Transforms.Onnx.OnnxTransformer>? _model = null;
+
+    public ObjectDetectionModelScorer(IOptions<ObjectDetectionOptions> options)
+    {
+        _modelFilePath = options.Value.ModelFilePath;
+    }
 
     public Dictionary<string, IEnumerable<float[]>> Score(Bitmap bitmapOnnx)
     {
@@ -45,7 +52,7 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
     {
         if (_model != null)
             return _model;
-        
+
         SetPipeline();
         var MLImages = new List<ImageDataInput>();
         var imageDataView = MlContext.Data.LoadFromEnumerable(MLImages);
@@ -86,7 +93,7 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
                 {
                     { "input_tensor", new[] { 1, 512, 512, 3 } }
                 },
-                modelFile: ModelFilePath,
+                modelFile: _modelFilePath,
                 outputColumnNames: new[]
                 {
                     ObjectDetectionConstants.OutputColumnDetectionAnchorIndices,
@@ -112,7 +119,7 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
     private Dictionary<string, IEnumerable<float[]>> PredictDataUsingModel(IDataView testData, ITransformer model)
     {
         var scoredData = model.Transform(testData);
-        
+
         var returns = new Dictionary<string, IEnumerable<float[]>>
         {
             {
@@ -123,9 +130,9 @@ public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
                 ObjectDetectionConstants.OutputColumnDetectionClasses,
                 scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionClasses)
             },
-            { 
-                ObjectDetectionConstants.OutputColumnDetectionScores, 
-                scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionScores) 
+            {
+                ObjectDetectionConstants.OutputColumnDetectionScores,
+                scoredData.GetColumn<float[]>(ObjectDetectionConstants.OutputColumnDetectionScores)
             }
         };
 

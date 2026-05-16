@@ -1,4 +1,5 @@
 ﻿using BrickManager.BrickRecognitionSystem.Application.Extensions;
+using BrickManager.BrickRecognitionSystem.Application.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,7 +23,8 @@ public class Startup
         serviceCollection.AddOptions();
 
         serviceCollection.AddApplicationServices();
-            
+        serviceCollection.Configure<ObjectDetectionOptions>(_configuration.GetSection(nameof(ObjectDetectionOptions)));
+
         serviceCollection.AddHealthChecks();
         serviceCollection.AddControllers();
     }
