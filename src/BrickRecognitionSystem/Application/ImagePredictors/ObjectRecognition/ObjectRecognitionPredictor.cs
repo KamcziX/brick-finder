@@ -6,12 +6,15 @@ using Serilog;
 
 namespace BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectRecognition;
 
+/// <summary>
+/// Placeholder contract for the object recognition predictor.
+/// To be implemented when the recognition pipeline is connected to the detection pipeline.
+/// </summary>
 public interface IObjectRecognitionPredictor
 {
-    
 }
 
-public class ObjectRecognitionPredictor : BaseMl
+public sealed class ObjectRecognitionPredictor : BaseMl
 {
     private static readonly string ML_NET_MODEL = Path.Combine(Environment.CurrentDirectory, "chapter12.mdl");
 

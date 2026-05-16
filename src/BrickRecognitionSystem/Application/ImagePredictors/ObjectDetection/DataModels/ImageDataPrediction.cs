@@ -4,7 +4,12 @@ using Microsoft.ML.Data;
 
 namespace BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection.DataModels;
 
-public class ImageDataPrediction(List<BoundingBox> boundingBoxList, Bitmap? annotatedImage)
+/// <summary>
+/// Result of the object detection pipeline, containing the detected bounding boxes and the original annotated image.
+/// </summary>
+/// <param name="boundingBoxList">List of bounding boxes for all detected objects.</param>
+/// <param name="annotatedImage">The original image, optionally annotated with detected object overlays.</param>
+public sealed class ImageDataPrediction(List<BoundingBox> boundingBoxList, Bitmap? annotatedImage)
 {
     /// <summary>
     /// Collection of bounding boxes (detected objects) metadata.

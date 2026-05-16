@@ -8,8 +8,16 @@ using Microsoft.ML.Data;
 
 namespace BrickManager.BrickRecognitionSystem.Application.ImagePredictors.ObjectDetection;
 
+/// <summary>
+/// Scores an image through the ONNX object detection model and returns raw detection output arrays.
+/// </summary>
 public interface IObjectDetectionModelScorer
 {
+    /// <summary>
+    /// Runs the ONNX detection model on the provided bitmap and returns the raw output column values.
+    /// </summary>
+    /// <param name="bitmapOnnx">The pre-processed input bitmap, sized to match the model's expected dimensions.</param>
+    /// <returns>A dictionary keyed by output column name containing the model's raw float array outputs.</returns>
     Dictionary<string, IEnumerable<float[]>> Score(Bitmap bitmapOnnx);
 }
 
@@ -17,7 +25,7 @@ public interface IObjectDetectionModelScorer
 /// Object detection predictor class that contains the pipeline to convert the input image to what the Onnx model expects,
 /// runs the detection logic on the model and then returns the results.
 /// </summary>
-public class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
+public sealed class ObjectDetectionModelScorer : BaseMl, IObjectDetectionModelScorer
 {
     private readonly string _modelFilePath;
     private static EstimatorChain<Microsoft.ML.Transforms.Onnx.OnnxTransformer>? _pipeline;
