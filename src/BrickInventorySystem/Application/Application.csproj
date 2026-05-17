@@ -8,4 +8,8 @@
         <RootNamespace>BrickManager.BrickInventorySystem.Application</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Serilog" Version="4.3.1" />
+    </ItemGroup>
+
 </Project>
